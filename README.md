@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# InfluenceIndia 🇮🇳
 
-## Getting Started
+India's influencer-brand collaboration marketplace. Brands discover verified Indian influencers with real metrics and transparent pricing. Influencers get listed and receive collaboration requests.
 
-First, run the development server:
+## Features
 
+- **For Brands**: Browse verified influencers, filter by niche/city/budget, view ratings, send collaboration requests
+- **For Influencers**: Multi-step onboarding, set pricing for Story/Post/Reel/Video, receive brand requests
+- **Rating System**: Composite score (followers 40pts + engagement 40pts + virality 20pts)
+- **Admin Panel**: Verify profiles, set/update influencer metrics
+- **Authentication**: Email/password with role-based routing (brand / influencer / admin)
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 14 (App Router) + TypeScript |
+| Database | Prisma + SQLite (zero setup, no account needed) |
+| Auth | NextAuth.js v5 |
+| UI | shadcn/ui + Tailwind CSS |
+| Forms | React Hook Form + Zod |
+
+**100% free and open-source. No external accounts or API keys required.**
+
+## Quick Start
+
+### 1. Install dependencies
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd influencer-collab
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Run migrations + seed demo data
+```bash
+npx prisma migrate dev --name init
+npm run seed
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Start the dev server
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000)
 
-## Learn More
+## Demo Credentials
 
-To learn more about Next.js, take a look at the following resources:
+| Role | Email | Password |
+|------|-------|---------|
+| **Admin** | admin@influenceindia.in | admin123 |
+| **Influencer** | priya.sharma@example.com | password123 |
+| **Brand** | brand@myntra.com | password123 |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Demo Flow
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **As a Brand** — Sign up → Complete onboarding (3 steps) → Browse influencers → Send collaboration request
+2. **As an Influencer** — Sign up → Complete onboarding (5 steps) → Wait for admin verification
+3. **As Admin** — Log in → Go to `/admin` → Expand influencer row → Set metrics + click "Approve & Verify"
+4. **Brand sees influencer** — Browse page → View profile → Send request → Influencer accepts in dashboard
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/
+│   ├── page.tsx                  # Landing page
+│   ├── login/                    # Login page
+│   ├── signup/                   # Signup with brand/influencer role selector
+│   ├── onboarding/
+│   │   ├── influencer/[step]/    # 5-step influencer onboarding
+│   │   └── brand/[step]/         # 3-step brand onboarding
+│   ├── influencers/
+│   │   ├── page.tsx              # Browse + filter + search
+│   │   └── [id]/page.tsx         # Full influencer profile
+│   ├── dashboard/
+│   │   ├── brand/                # Brand: requests history
+│   │   └── influencer/           # Influencer: accept/decline requests
+│   ├── admin/                    # Verify influencers + brands
+│   └── api/                      # REST API routes
+├── components/
+│   ├── ui/                       # shadcn/ui components
+│   ├── layout/                   # Header, Footer
+│   ├── influencer/               # Cards, filters, pricing, rating badge
+│   ├── brand/                    # Contact form
+│   ├── admin/                    # Admin row components
+│   └── onboarding/               # Step indicator
+├── lib/
+│   ├── prisma.ts                 # DB client singleton
+│   ├── auth.ts                   # NextAuth configuration
+│   ├── scoring.ts                # Rating algorithm
+│   └── utils.ts                  # cn(), formatters
+└── types/index.ts                # Shared TypeScript types
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Rating Algorithm
+
+```
+Score (0–100) = Followers (40pts) + Engagement (40pts) + Virality (20pts)
+
+Followers:   min(followerCount / 1,000,000 × 40, 40)
+Engagement:  min(engagementRate × 4, 40)   // 10% engagement = max 40pts
+Virality:    (viralityScore / 100) × 20
+```
+
+Scores are set by admins in the verification flow. Colors: 🔴 0–40 · 🟡 41–70 · 🟢 71–100
+
+## Useful Commands
+
+```bash
+npm run dev          # Start development server
+npm run build        # Production build
+npm run seed         # Seed demo data
+npm run db:reset     # Drop + recreate + reseed database
+npx prisma studio    # Visual DB browser
+```

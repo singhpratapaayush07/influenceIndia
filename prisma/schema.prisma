@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  password           String
+  userType           String    // "brand" | "influencer" | "admin"
+  onboardingComplete Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  influencerProfile  InfluencerProfile?
+  brandProfile       BrandProfile?
+  sentRequests       ContactRequest[]   @relation("BrandRequests")
+  receivedRequests   ContactRequest[]   @relation("InfluencerRequests")
+
+  @@map("users")
+}
+
+model InfluencerProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  displayName       String
+  bio               String?
+  niches            Json     @default("[]")
+  instagramHandle   String?
+  youtubeHandle     String?
+  tiktokHandle      String?
+  followerCount     Int      @default(0)
+  engagementRate    Float    @default(0)
+  viralityScore     Float    @default(0)
+  overallScore      Float    @default(0)
+  isVerified        Boolean  @default(false)
+  profilePictureUrl String?
+  city              String?
+  languages         Json     @default("[]")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pricing  InfluencerPricing[]
+  requests ContactRequest[]    @relation("InfluencerProfileRequests")
+
+  @@map("influencer_profiles")
+}
+
+model InfluencerPricing {
+  id             String   @id @default(cuid())
+  influencerId   String
+  tierType       String   // "story" | "post" | "reel" | "video"
+  priceInr       Int
+  description    String?
+  deliverables   String?
+  turnaroundDays Int      @default(7)
+  createdAt      DateTime @default(now())
+
+  influencer InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+
+  @@map("influencer_pricing")
+}
+
+model BrandProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  companyName  String
+  industry     String?
+  website      String?
+  logoUrl      String?
+  description  String?
+  budgetRange  String?
+  gstNumber    String?
+  isVerified   Boolean  @default(false)
+  targetNiches Json     @default("[]")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requests ContactRequest[] @relation("BrandProfileRequests")
+
+  @@map("brand_profiles")
+}
+
+model ContactRequest {
+  id                String   @id @default(cuid())
+  brandUserId       String
+  influencerUserId  String
+  brandProfileId    String
+  influencerProfileId String
+  tierType          String?
+  message           String
+  status            String   @default("pending")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  brandUser         User              @relation("BrandRequests", fields: [brandUserId], references: [id])
+  influencerUser    User              @relation("InfluencerRequests", fields: [influencerUserId], references: [id])
+  influencerProfile InfluencerProfile @relation("InfluencerProfileRequests", fields: [influencerProfileId], references: [id])
+  brandProfile      BrandProfile      @relation("BrandProfileRequests", fields: [brandProfileId], references: [id])
+
+  @@map("contact_requests")
+}
