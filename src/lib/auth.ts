@@ -14,21 +14,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.userType = (user as any).userType;
         token.onboardingComplete = (user as any).onboardingComplete;
       }
-      // Refresh from DB when session.update() is called (runs in Node.js, not Edge)
-      if (trigger === "update" && token.id) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { onboardingComplete: true, userType: true },
-        });
-        if (dbUser) {
-          token.onboardingComplete = dbUser.onboardingComplete;
-          token.userType = dbUser.userType;
+      if (trigger === "update") {
+        // If caller passed data directly, use it (fast path — no DB round trip)
+        if (session?.onboardingComplete !== undefined) {
+          token.onboardingComplete = session.onboardingComplete;
+        } else if (token.id) {
+          // Fallback: re-fetch from DB
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { onboardingComplete: true, userType: true },
+          });
+          if (dbUser) {
+            token.onboardingComplete = dbUser.onboardingComplete;
+            token.userType = dbUser.userType;
+          }
         }
       }
       return token;

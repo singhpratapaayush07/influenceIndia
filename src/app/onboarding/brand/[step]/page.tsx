@@ -67,7 +67,7 @@ export default function BrandOnboardingPage() {
     const res = await fetch("/api/onboarding/brand/submit", { method: "POST" });
     const data = await res.json();
     if (!res.ok) { toast.error(data.error); setLoading(false); return; }
-    await update();
+    await update({ onboardingComplete: true });
     toast.success("Profile submitted! You can now browse influencers.");
     window.location.href = "/dashboard/brand";
   }

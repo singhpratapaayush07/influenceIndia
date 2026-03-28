@@ -102,7 +102,7 @@ export default function InfluencerOnboardingPage() {
     const res = await fetch("/api/onboarding/influencer/submit", { method: "POST" });
     const data = await res.json();
     if (!res.ok) { toast.error(data.error); setLoading(false); return; }
-    await update();
+    await update({ onboardingComplete: true });
     toast.success("Profile submitted for verification!");
     window.location.href = "/dashboard/influencer";
   }
