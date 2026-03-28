@@ -5,9 +5,10 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = session.user.id as string;
 
   const profile = await prisma.influencerProfile.findUnique({
-    where: { userId: session.user.id },
+    where: { userId },
     include: { pricing: { orderBy: { priceInr: "asc" } } },
   });
 
@@ -25,6 +26,7 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = session.user.id as string;
 
   const body = await req.json();
   const {
@@ -36,7 +38,7 @@ export async function PATCH(req: NextRequest) {
   if (!niches?.length) return NextResponse.json({ error: "Select at least one niche" }, { status: 400 });
 
   await prisma.influencerProfile.update({
-    where: { userId: session.user.id },
+    where: { userId },
     data: {
       displayName: displayName.trim(),
       bio: bio?.trim() || null,
@@ -50,14 +52,13 @@ export async function PATCH(req: NextRequest) {
     },
   });
 
-  // Update pricing — delete existing and recreate
   if (pricing) {
-    await prisma.influencerPricing.deleteMany({ where: { influencerId: session.user.id } });
+    await prisma.influencerPricing.deleteMany({ where: { influencerId: userId } });
     const tierTypes = ["story", "post", "reel", "video"];
     const pricingRows = tierTypes
       .filter(t => parseInt(pricing[t]?.price) > 0)
       .map(tierType => ({
-        influencerId: session.user.id,
+        influencerId: userId,
         tierType,
         priceInr: parseInt(pricing[tierType].price),
         description: pricing[tierType].desc || null,
