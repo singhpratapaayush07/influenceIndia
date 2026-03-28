@@ -1,16 +1,35 @@
-import NextAuth from "next-auth";
-import { authConfig } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const { auth } = NextAuth(authConfig);
+function getSessionFromCookie(req: NextRequest) {
+  // NextAuth v5 uses these cookie names
+  const token =
+    req.cookies.get("__Secure-authjs.session-token")?.value ||
+    req.cookies.get("authjs.session-token")?.value;
 
-export default auth((req) => {
-  const { nextUrl, auth: session } = req;
+  if (!token) return null;
+
+  try {
+    // Decode JWT payload (base64) — no crypto needed for routing decisions
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(
+      Buffer.from(parts[1].replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf-8")
+    );
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+export function middleware(req: NextRequest) {
+  const { nextUrl } = req;
   const path = nextUrl.pathname;
 
-  const isLoggedIn = !!session?.user;
-  const userType = (session?.user as any)?.userType;
-  const onboardingComplete = (session?.user as any)?.onboardingComplete;
+  const session = getSessionFromCookie(req);
+  const isLoggedIn = !!session;
+  const userType = session?.userType;
+  const onboardingComplete = session?.onboardingComplete;
 
   // Protect dashboard routes
   if (path.startsWith("/dashboard/brand")) {
@@ -42,7 +61,7 @@ export default auth((req) => {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
