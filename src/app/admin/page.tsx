@@ -90,7 +90,7 @@ export default async function AdminPage() {
               ) : (
                 <div className="divide-y">
                   {pendingInfluencers.map(inf => (
-                    <AdminInfluencerRow key={inf.id} influencer={inf} />
+                    <AdminInfluencerRow key={inf.id} influencer={{ ...inf, niches: (inf.niches as string[]) ?? [] }} />
                   ))}
                 </div>
               )}
