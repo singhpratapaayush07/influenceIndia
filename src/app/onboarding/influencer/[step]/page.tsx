@@ -104,7 +104,7 @@ export default function InfluencerOnboardingPage() {
     if (!res.ok) { toast.error(data.error); setLoading(false); return; }
     await update();
     toast.success("Profile submitted for verification!");
-    router.push("/dashboard/influencer");
+    window.location.href = "/dashboard/influencer";
   }
 
   function toggleNiche(niche: string) {

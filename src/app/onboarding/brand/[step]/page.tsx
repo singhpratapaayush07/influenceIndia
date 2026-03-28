@@ -69,7 +69,7 @@ export default function BrandOnboardingPage() {
     if (!res.ok) { toast.error(data.error); setLoading(false); return; }
     await update();
     toast.success("Profile submitted! You can now browse influencers.");
-    router.push("/dashboard/brand");
+    window.location.href = "/dashboard/brand";
   }
 
   function toggleNiche(niche: string) {
