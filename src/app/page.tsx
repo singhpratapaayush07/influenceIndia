@@ -119,7 +119,7 @@ export default async function HomePage() {
       <section className="py-14 px-6 border-b border-gray-100">
         <div className="container mx-auto max-w-5xl">
           <p className="text-center text-xs font-semibold tracking-[0.2em] text-gray-300 uppercase mb-8">
-            Brands already on the platform
+            Built for brands like
           </p>
           <div className="flex flex-wrap items-center justify-center gap-12">
             {["Myntra", "Mamaearth", "Zepto", "boAt", "Nykaa"].map(brand => (

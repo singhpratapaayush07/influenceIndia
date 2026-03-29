@@ -23,6 +23,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Profile not found" }, { status: 404 });
   }
 
+  if (!brandProfile.isVerified) {
+    return NextResponse.json({ error: "Your brand profile is pending verification. Please wait for admin approval before sending collaboration requests." }, { status: 403 });
+  }
+
   const existing = await prisma.contactRequest.findFirst({
     where: { brandUserId: session.user.id, influencerUserId, status: "pending" },
   });

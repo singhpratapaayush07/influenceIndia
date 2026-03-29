@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { RatingBadge } from "@/components/influencer/RatingBadge";
 import { PricingTiers } from "@/components/influencer/PricingTiers";
 import { ContactForm } from "@/components/brand/ContactForm";
+import { FavoriteButton } from "@/components/influencer/FavoriteButton";
 import { auth } from "@/lib/auth";
 import { formatFollowers, getScoreLabel } from "@/lib/scoring";
 import { CheckCircle2, AtSign, Video, MapPin, Users, TrendingUp, Zap } from "lucide-react";
@@ -23,6 +24,26 @@ export default async function InfluencerProfilePage({ params }: { params: { id: 
   const niches: string[] = (profile.niches as unknown as string[]) || [];
   const languages: string[] = (profile.languages as unknown as string[]) || [];
 
+  // Check if current user has favorited this influencer
+  let isFavorited = false;
+  if (session?.user?.id && viewerType === "brand") {
+    const brandProfile = await prisma.brandProfile.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    if (brandProfile) {
+      const favorite = await prisma.favorite.findUnique({
+        where: {
+          brandProfileId_influencerProfileId: {
+            brandProfileId: brandProfile.id,
+            influencerProfileId: profile.id,
+          },
+        },
+      });
+      isFavorited = !!favorite;
+    }
+  }
+
   const scoreBreakdown = {
     followers: Math.min((profile.followerCount / 1_000_000) * 40, 40),
     engagement: Math.min(profile.engagementRate * 4, 40),
@@ -35,7 +56,8 @@ export default async function InfluencerProfilePage({ params }: { params: { id: 
         {/* Left Column */}
         <div className="md:col-span-1 space-y-6">
           {/* Profile Card */}
-          <div className="bg-white border rounded-2xl p-6 text-center">
+          <div className="bg-white border rounded-2xl p-6 text-center relative">
+            <FavoriteButton influencerProfileId={profile.id} initialIsFavorited={isFavorited} />
             <Avatar className="h-24 w-24 mx-auto mb-4">
               <AvatarImage src={profile.profilePictureUrl || undefined} />
               <AvatarFallback className="bg-purple-100 text-purple-700 text-3xl font-bold">

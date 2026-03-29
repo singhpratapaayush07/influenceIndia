@@ -26,9 +26,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-sm mb-3">Company</h4>
             <ul className="space-y-2 text-sm text-gray-500">
-              <li><span className="cursor-default">About Us</span></li>
-              <li><span className="cursor-default">Privacy Policy</span></li>
-              <li><span className="cursor-default">Terms of Service</span></li>
+              <li><Link href="/about" className="hover:text-purple-700">About Us</Link></li>
+              <li><Link href="/privacy" className="hover:text-purple-700">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-purple-700">Terms of Service</Link></li>
             </ul>
           </div>
         </div>
