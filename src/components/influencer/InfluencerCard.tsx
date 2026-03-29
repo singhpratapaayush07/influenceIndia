@@ -3,24 +3,56 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { RatingBadge } from "./RatingBadge";
+import { FavoriteButton } from "./FavoriteButton";
 import { formatFollowers, formatPrice } from "@/lib/scoring";
-import { MapPin, AtSign, Users, CheckCircle2 } from "lucide-react";
+import { MapPin, AtSign, Users, CheckCircle2, Star, Zap, Award } from "lucide-react";
 import type { InfluencerWithPricing } from "@/types";
 
 interface InfluencerCardProps {
   influencer: InfluencerWithPricing;
+  isFavorited?: boolean;
 }
 
-export function InfluencerCard({ influencer }: InfluencerCardProps) {
+export function InfluencerCard({ influencer, isFavorited = false }: InfluencerCardProps) {
   const niches: string[] = (influencer.niches as unknown as string[]) || [];
   const minPrice = influencer.pricing.length > 0
     ? Math.min(...influencer.pricing.map(p => p.priceInr))
     : null;
 
+  // Determine badges
+  const isFeatured = influencer.isFeatured;
+  const isFastResponder = (influencer.avgResponseTime ?? 999) < 24;
+  const isTopRated = influencer.overallScore > 80;
+
   return (
     <Link href={`/influencers/${influencer.userId}`}>
-      <Card className="hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer h-full">
+      <Card className="hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer h-full relative">
+        <FavoriteButton influencerProfileId={influencer.id} initialIsFavorited={isFavorited} />
         <CardContent className="p-5">
+          {/* Badges row */}
+          {(isFeatured || isFastResponder || isTopRated) && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {isFeatured && (
+                <Badge className="bg-amber-500 text-white border-0 text-xs">
+                  <Star className="h-3 w-3 mr-1 fill-current" />
+                  Featured
+                </Badge>
+              )}
+              {isFastResponder && (
+                <Badge className="bg-green-600 text-white border-0 text-xs">
+                  <Zap className="h-3 w-3 mr-1 fill-current" />
+                  Fast Responder
+                </Badge>
+              )}
+              {isTopRated && (
+                <Badge className="bg-blue-600 text-white border-0 text-xs">
+                  <Award className="h-3 w-3 mr-1 fill-current" />
+                  Top Rated
+                </Badge>
+              )}
+            </div>
+          )}
+
           <div className="flex items-start gap-3 mb-3">
             <Avatar className="h-14 w-14 flex-shrink-0">
               <AvatarImage src={influencer.profilePictureUrl || undefined} />

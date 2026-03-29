@@ -59,6 +59,26 @@ export function Header() {
           >
             Browse Influencers
           </Link>
+          {session && userType === "influencer" && (
+            <Link
+              href="/campaigns"
+              className={`text-sm font-medium transition-colors ${
+                isHome ? "text-white/80 hover:text-white" : "text-gray-500 hover:text-purple-700"
+              }`}
+            >
+              Campaigns
+            </Link>
+          )}
+          {session && (userType === "brand" || userType === "influencer") && (
+            <Link
+              href="/dashboard/messages"
+              className={`text-sm font-medium transition-colors ${
+                isHome ? "text-white/80 hover:text-white" : "text-gray-500 hover:text-purple-700"
+              }`}
+            >
+              Messages
+            </Link>
+          )}
           {!session && (
             <>
               <Link

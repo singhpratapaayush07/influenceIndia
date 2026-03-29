@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { InfluencerCard } from "@/components/influencer/InfluencerCard";
 import { InfluencerFilters } from "@/components/influencer/InfluencerFilters";
 import { Suspense } from "react";
+import { auth } from "@/lib/auth";
 import type { InfluencerWithPricing } from "@/types";
 
 interface SearchParams {
@@ -10,26 +11,48 @@ interface SearchParams {
   city?: string;
   minScore?: string;
   maxPrice?: string;
+  gender?: string;
+  ageRange?: string;
+  language?: string;
+  responseTime?: string;
+  sortBy?: string;
   page?: string;
 }
 
 async function getInfluencers(searchParams: SearchParams): Promise<InfluencerWithPricing[]> {
   const niches = searchParams.niches?.split(",").filter(Boolean) || [];
 
+  // Build order by clause based on sortBy
+  let orderBy: any = { overallScore: "desc" }; // default
+  if (searchParams.sortBy === "price-asc") {
+    orderBy = { pricing: { _count: "desc" } }; // This is a workaround, will sort in JS
+  } else if (searchParams.sortBy === "followers-desc") {
+    orderBy = { followerCount: "desc" };
+  } else if (searchParams.sortBy === "newest") {
+    orderBy = { createdAt: "desc" };
+  }
+
   const profiles = await prisma.influencerProfile.findMany({
     where: {
       isVerified: true,
       ...(searchParams.q && {
         OR: [
-          { displayName: { contains: searchParams.q } },
-          { instagramHandle: { contains: searchParams.q } },
+          { displayName: { contains: searchParams.q, mode: "insensitive" } },
+          { instagramHandle: { contains: searchParams.q, mode: "insensitive" } },
+          { bio: { contains: searchParams.q, mode: "insensitive" } },
         ],
       }),
       ...(searchParams.city && { city: searchParams.city }),
       ...(searchParams.minScore && { overallScore: { gte: parseFloat(searchParams.minScore) } }),
+      ...(searchParams.gender && { gender: searchParams.gender }),
+      ...(searchParams.ageRange && { ageRange: searchParams.ageRange }),
+      ...(searchParams.language && { primaryLanguage: searchParams.language }),
+      ...(searchParams.responseTime && {
+        avgResponseTime: { lte: parseInt(searchParams.responseTime) }
+      }),
     },
     include: { pricing: true },
-    orderBy: { overallScore: "desc" },
+    orderBy,
     take: 24,
   });
 
@@ -53,6 +76,15 @@ async function getInfluencers(searchParams: SearchParams): Promise<InfluencerWit
     );
   }
 
+  // Sort by price if requested (since we can't do this in Prisma easily)
+  if (searchParams.sortBy === "price-asc") {
+    filtered.sort((a, b) => {
+      const aMin = a.pricing.length > 0 ? Math.min(...a.pricing.map(p => p.priceInr)) : 999999;
+      const bMin = b.pricing.length > 0 ? Math.min(...b.pricing.map(p => p.priceInr)) : 999999;
+      return aMin - bMin;
+    });
+  }
+
   return filtered as unknown as InfluencerWithPricing[];
 }
 
@@ -62,6 +94,26 @@ export default async function InfluencersPage({
   searchParams: SearchParams;
 }) {
   const influencers = await getInfluencers(searchParams);
+
+  // Get current user's favorites if they're a brand
+  const session = await auth();
+  let favoriteIds: Set<string> = new Set();
+
+  const userType = session?.user ? (session.user as any).userType : null;
+  if (session?.user?.id && userType === "brand") {
+    const brandProfile = await prisma.brandProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    });
+
+    if (brandProfile) {
+      const favorites = await prisma.favorite.findMany({
+        where: { brandProfileId: brandProfile.id },
+        select: { influencerProfileId: true },
+      });
+      favoriteIds = new Set(favorites.map(f => f.influencerProfileId));
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -94,7 +146,11 @@ export default async function InfluencersPage({
               <p className="text-sm text-gray-500 mb-4">{influencers.length} influencer{influencers.length !== 1 ? "s" : ""} found</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {influencers.map(influencer => (
-                  <InfluencerCard key={influencer.id} influencer={influencer} />
+                  <InfluencerCard
+                    key={influencer.id}
+                    influencer={influencer}
+                    isFavorited={favoriteIds.has(influencer.id)}
+                  />
                 ))}
               </div>
             </>

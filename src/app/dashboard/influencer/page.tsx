@@ -10,7 +10,7 @@ import { RatingBadge } from "@/components/influencer/RatingBadge";
 import { formatFollowers } from "@/lib/scoring";
 import {
   CheckCircle2, Clock, XCircle, Mail, Users, TrendingUp,
-  ShieldCheck, Pencil, ExternalLink, Star, IndianRupee,
+  ShieldCheck, Pencil, ExternalLink, Star, IndianRupee, Briefcase,
 } from "lucide-react";
 import { RequestStatusButtons } from "@/components/influencer/RequestStatusButtons";
 
@@ -115,6 +115,11 @@ export default async function InfluencerDashboardPage() {
                 {/* Actions */}
                 <div className="mt-4 space-y-2">
                   <Button className="w-full bg-purple-700 hover:bg-purple-800 gap-2" asChild>
+                    <Link href="/campaigns">
+                      <Briefcase className="h-4 w-4" /> Browse Campaigns
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="w-full gap-2" asChild>
                     <Link href="/dashboard/influencer/edit-profile">
                       <Pencil className="h-4 w-4" /> Edit Profile
                     </Link>

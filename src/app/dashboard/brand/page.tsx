@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, CheckCircle2, Clock, XCircle, TrendingUp, Building2 } from "lucide-react";
+import { Search, CheckCircle2, Clock, XCircle, TrendingUp, Building2, Heart, Briefcase } from "lucide-react";
 import { formatPrice } from "@/lib/scoring";
 
 export default async function BrandDashboardPage() {
@@ -48,9 +48,17 @@ export default async function BrandDashboardPage() {
           <h1 className="text-2xl font-bold text-gray-900">Brand Dashboard</h1>
           <p className="text-gray-500 text-sm mt-1">Welcome back, {brandProfile?.companyName || user.email}</p>
         </div>
-        <Button className="bg-purple-700 hover:bg-purple-800" asChild>
-          <Link href="/influencers"><Search className="h-4 w-4 mr-2" />Find Influencers</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/dashboard/brand/favorites"><Heart className="h-4 w-4 mr-2" />Favorites</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/dashboard/brand/campaigns"><Briefcase className="h-4 w-4 mr-2" />My Campaigns</Link>
+          </Button>
+          <Button className="bg-purple-700 hover:bg-purple-800" asChild>
+            <Link href="/influencers"><Search className="h-4 w-4 mr-2" />Find Influencers</Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
