@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { MessageInput } from "./MessageInput";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft } from "lucide-react";
