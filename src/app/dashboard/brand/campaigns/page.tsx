@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Calendar, Plus, TrendingUp, Users } from "lucide-react";
+import { Briefcase, Calendar, Plus, Users } from "lucide-react";
 import { formatPrice } from "@/lib/scoring";
 
 export default async function BrandCampaignsPage() {

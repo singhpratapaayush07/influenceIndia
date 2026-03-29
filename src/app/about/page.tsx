@@ -9,7 +9,7 @@ export default function AboutPage() {
         <CardContent className="pt-6">
           <h2 className="text-xl font-semibold mb-3">Our Mission</h2>
           <p className="text-gray-600 leading-relaxed mb-4">
-            InfluenceIndia is India's premier influencer marketing platform, connecting brands with authentic creators across diverse niches.
+            InfluenceIndia is India&apos;s premier influencer marketing platform, connecting brands with authentic creators across diverse niches.
             We empower brands to find the perfect influencer partners and enable creators to monetize their content and grow their influence.
           </p>
 
@@ -27,7 +27,7 @@ export default function AboutPage() {
 
           <h2 className="text-xl font-semibold mb-3 mt-6">Why Choose Us</h2>
           <p className="text-gray-600 leading-relaxed">
-            With InfluenceIndia, you get access to India's largest network of verified influencers, advanced analytics,
+            With InfluenceIndia, you get access to India&apos;s largest network of verified influencers, advanced analytics,
             and a platform built specifically for the Indian market. We understand the unique dynamics of influencer marketing
             in India and provide tools tailored to your needs.
           </p>

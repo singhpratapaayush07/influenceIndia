@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, CheckCircle2, Clock, XCircle, TrendingUp, Building2, Heart, Briefcase } from "lucide-react";
+import { Search, CheckCircle2, Clock, XCircle, TrendingUp, Heart, Briefcase } from "lucide-react";
 import { formatPrice } from "@/lib/scoring";
 
 export default async function BrandDashboardPage() {

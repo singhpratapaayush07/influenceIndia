@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, Calendar, CheckCircle2, MapPin, Target, TrendingUp, Users } from "lucide-react";
+import { ArrowLeft, Calendar, CheckCircle2, MapPin, Target, Users } from "lucide-react";
 import { formatPrice } from "@/lib/scoring";
 import { ProposalForm } from "@/components/campaign/ProposalForm";
 

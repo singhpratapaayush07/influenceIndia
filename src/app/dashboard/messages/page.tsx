@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MessageSquare, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-async function getConversations(userId: string, userType: string) {
+async function getConversations(userId: string) {
   // Get all accepted contact requests where user is involved
   const requests = await prisma.contactRequest.findMany({
     where: {
@@ -66,8 +66,7 @@ export default async function MessagesPage() {
     redirect("/login");
   }
 
-  const userType = (session.user as any).userType;
-  const conversations = await getConversations(session.user.id, userType);
+  const conversations = await getConversations(session.user.id);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">

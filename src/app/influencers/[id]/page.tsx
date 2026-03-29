@@ -8,7 +8,7 @@ import { PricingTiers } from "@/components/influencer/PricingTiers";
 import { ContactForm } from "@/components/brand/ContactForm";
 import { FavoriteButton } from "@/components/influencer/FavoriteButton";
 import { auth } from "@/lib/auth";
-import { formatFollowers, getScoreLabel } from "@/lib/scoring";
+import { formatFollowers } from "@/lib/scoring";
 import { CheckCircle2, AtSign, Video, MapPin, Users, TrendingUp, Zap } from "lucide-react";
 
 export default async function InfluencerProfilePage({ params }: { params: { id: string } }) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { StepIndicator } from "@/components/onboarding/StepIndicator";
@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, AtSign, Video, TrendingUp } from "lucide-react";
+import { Loader2, AtSign, Video } from "lucide-react";
 import { NICHES, CITIES, TIER_TYPES } from "@/types";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -20,7 +19,7 @@ const STEPS = ["Account", "Social", "Profile", "Pricing", "Review"];
 export default function InfluencerOnboardingPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session, update } = useSession();
+  const { update } = useSession();
   const currentStep = parseInt(params.step as string) || 1;
   const [loading, setLoading] = useState(false);
 

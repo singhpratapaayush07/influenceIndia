@@ -2,7 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { calculateScore } from "@/lib/scoring";
 import { redirect } from "next/navigation";
 
 // ─── Influencer onboarding ────────────────────────────────────────────────────
