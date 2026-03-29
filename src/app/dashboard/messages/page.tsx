@@ -9,16 +9,14 @@ import { MessageSquare, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 async function getConversations(userId: string, userType: string) {
-  // Get all contact requests where user is involved and has messages
+  // Get all accepted contact requests where user is involved
   const requests = await prisma.contactRequest.findMany({
     where: {
       OR: [
         { brandUserId: userId },
         { influencerUserId: userId },
       ],
-      messages: {
-        some: {},
-      },
+      status: "accepted",
     },
     include: {
       messages: {

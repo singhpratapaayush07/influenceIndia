@@ -17,5 +17,18 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   await prisma.contactRequest.update({ where: { id: params.id }, data: { status } });
+
+  // Create initial message when request is accepted
+  if (status === "accepted" && request.message) {
+    await prisma.message.create({
+      data: {
+        requestId: params.id,
+        senderId: request.brandUserId,
+        receiverId: request.influencerUserId,
+        content: request.message,
+      },
+    });
+  }
+
   return NextResponse.json({ success: true });
 }
