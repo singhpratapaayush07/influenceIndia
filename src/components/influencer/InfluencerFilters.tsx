@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { NICHES, CITIES } from "@/types";
+import { NICHES, CITIES, GENDERS, AGE_RANGES, LANGUAGES } from "@/types";
 import { cn } from "@/lib/utils";
 import { useState, useCallback } from "react";
 import { Search, X } from "lucide-react";
@@ -21,6 +21,11 @@ export function InfluencerFilters() {
   const [city, setCity] = useState(searchParams.get("city") || "");
   const [minScore, setMinScore] = useState(parseInt(searchParams.get("minScore") || "0"));
   const [maxPrice, setMaxPrice] = useState(parseInt(searchParams.get("maxPrice") || "500000"));
+  const [gender, setGender] = useState(searchParams.get("gender") || "");
+  const [ageRange, setAgeRange] = useState(searchParams.get("ageRange") || "");
+  const [language, setLanguage] = useState(searchParams.get("language") || "");
+  const [responseTime, setResponseTime] = useState(searchParams.get("responseTime") || "");
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "");
 
   const applyFilters = useCallback(() => {
     const params = new URLSearchParams();
@@ -29,8 +34,13 @@ export function InfluencerFilters() {
     if (city) params.set("city", city);
     if (minScore > 0) params.set("minScore", minScore.toString());
     if (maxPrice < 500000) params.set("maxPrice", maxPrice.toString());
+    if (gender) params.set("gender", gender);
+    if (ageRange) params.set("ageRange", ageRange);
+    if (language) params.set("language", language);
+    if (responseTime) params.set("responseTime", responseTime);
+    if (sortBy) params.set("sortBy", sortBy);
     router.push(`/influencers?${params.toString()}`);
-  }, [search, selectedNiches, city, minScore, maxPrice, router]);
+  }, [search, selectedNiches, city, minScore, maxPrice, gender, ageRange, language, responseTime, sortBy, router]);
 
   function clearFilters() {
     setSearch("");
@@ -38,6 +48,11 @@ export function InfluencerFilters() {
     setCity("");
     setMinScore(0);
     setMaxPrice(500000);
+    setGender("");
+    setAgeRange("");
+    setLanguage("");
+    setResponseTime("");
+    setSortBy("");
     router.push("/influencers");
   }
 
@@ -47,7 +62,8 @@ export function InfluencerFilters() {
     );
   }
 
-  const hasFilters = search || selectedNiches.length > 0 || city || minScore > 0 || maxPrice < 500000;
+  const hasFilters = search || selectedNiches.length > 0 || city || minScore > 0 || maxPrice < 500000 ||
+                     gender || ageRange || language || responseTime || sortBy;
 
   return (
     <div className="space-y-6">
@@ -135,6 +151,74 @@ export function InfluencerFilters() {
         <div className="flex justify-between text-xs text-gray-400">
           <span>₹0</span><span>₹2.5L</span><span>₹5L+</span>
         </div>
+      </div>
+
+      {/* Gender */}
+      <div className="space-y-2">
+        <Label>Gender</Label>
+        <select
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          value={gender}
+          onChange={e => setGender(e.target.value)}
+        >
+          <option value="">All</option>
+          {GENDERS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
+        </select>
+      </div>
+
+      {/* Age Range */}
+      <div className="space-y-2">
+        <Label>Age Range</Label>
+        <select
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          value={ageRange}
+          onChange={e => setAgeRange(e.target.value)}
+        >
+          <option value="">All</option>
+          {AGE_RANGES.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+        </select>
+      </div>
+
+      {/* Language */}
+      <div className="space-y-2">
+        <Label>Primary Language</Label>
+        <select
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          value={language}
+          onChange={e => setLanguage(e.target.value)}
+        >
+          <option value="">All</option>
+          {LANGUAGES.map(lang => <option key={lang} value={lang}>{lang}</option>)}
+        </select>
+      </div>
+
+      {/* Response Time */}
+      <div className="space-y-2">
+        <Label>Response Time</Label>
+        <select
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          value={responseTime}
+          onChange={e => setResponseTime(e.target.value)}
+        >
+          <option value="">All</option>
+          <option value="24">Under 24 hours</option>
+          <option value="48">Under 48 hours</option>
+        </select>
+      </div>
+
+      {/* Sort By */}
+      <div className="space-y-2">
+        <Label>Sort By</Label>
+        <select
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value)}
+        >
+          <option value="">Rating (High to Low)</option>
+          <option value="price-asc">Price (Low to High)</option>
+          <option value="followers-desc">Followers (High to Low)</option>
+          <option value="newest">Newest First</option>
+        </select>
       </div>
 
       <div className="flex gap-2">

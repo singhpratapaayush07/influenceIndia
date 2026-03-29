@@ -41,3 +41,9 @@ prisma/dev.db-journal
 next-env.d.ts
 
 /src/generated/prisma
+
+# playwright and testing artifacts
+.playwright-mcp/
+
+# project instructions
+claude.md
