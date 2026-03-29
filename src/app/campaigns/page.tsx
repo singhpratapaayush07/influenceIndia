@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Briefcase, Calendar, MapPin, Target, TrendingUp, Users, CheckCircle2 } from "lucide-react";
 import { formatPrice } from "@/lib/scoring";
+import { prisma } from "@/lib/prisma";
 
 export default async function CampaignsPage() {
   const session = await auth();
@@ -15,18 +16,40 @@ export default async function CampaignsPage() {
   const user = session.user as any;
   if (user.userType !== "influencer") redirect("/");
 
-  // Fetch campaigns from API
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/campaigns`, {
-    headers: {
-      Cookie: `authjs.session-token=${(session as any).sessionToken}`,
-    },
-    cache: "no-store",
+  // Get influencer profile
+  const influencerProfile = await prisma.influencerProfile.findUnique({
+    where: { userId: session.user.id },
   });
 
-  let campaigns = [];
-  if (res.ok) {
-    campaigns = await res.json();
-  }
+  if (!influencerProfile) redirect("/onboarding");
+
+  // Fetch active campaigns with proposals from this influencer
+  const campaigns = await prisma.campaign.findMany({
+    where: {
+      status: "active",
+    },
+    include: {
+      brandProfile: {
+        select: {
+          companyName: true,
+          isVerified: true,
+        },
+      },
+      proposals: {
+        where: {
+          influencerProfileId: influencerProfile.id,
+        },
+        select: {
+          id: true,
+          status: true,
+          proposedPrice: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
