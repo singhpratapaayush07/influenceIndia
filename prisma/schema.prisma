@@ -10,8 +10,10 @@ datasource db {
 model User {
   id                 String    @id @default(cuid())
   email              String    @unique
-  password           String
+  password           String?   // Nullable: set after OTP verification or null for OAuth users
   userType           String    // "brand" | "influencer" | "admin"
+  emailVerified      Boolean   @default(false)
+  authProvider       String?   // "google" | null (for email/password)
   onboardingComplete Boolean   @default(false)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
@@ -189,4 +191,18 @@ model Favorite {
 
   @@unique([brandProfileId, influencerProfileId])
   @@map("favorites")
+}
+
+model OtpVerification {
+  id        String   @id @default(cuid())
+  email     String
+  otp       String   // Hashed OTP
+  purpose   String   // "signup" | "reset-password"
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([email, purpose])
+  @@index([expiresAt])
+  @@map("otp_verifications")
 }
