@@ -51,7 +51,7 @@ function SignupForm() {
     }
   }, [resendTimer]);
 
-  const handleSendOtp = async (emailValue: string) => {
+  const handleSendOtp = async (emailValue: string): Promise<"sent" | "skipped" | "error"> => {
     setLoading(true);
     try {
       const res = await fetch("/api/auth/otp/send", {
@@ -65,22 +65,22 @@ function SignupForm() {
       if (!res.ok) {
         toast.error(data.error || "Failed to send OTP");
         setLoading(false);
-        return false;
+        return "error";
       }
 
       if (data.skipOtp) {
         setSkipOtp(true);
         setOtpVerified(true);
         toast.success("QA email detected - verification bypassed");
-        return true;
+        return "skipped";
       }
 
       toast.success("Verification code sent to your email");
       setResendTimer(60);
-      return true;
+      return "sent";
     } catch (error) {
       toast.error("Failed to send verification code");
-      return false;
+      return "error";
     } finally {
       setLoading(false);
     }
@@ -92,13 +92,11 @@ function SignupForm() {
     const emailValue = formData.get("email") as string;
     setEmail(emailValue);
 
-    const success = await handleSendOtp(emailValue);
-    if (success) {
-      if (skipOtp) {
-        setStep("password");
-      } else {
-        setStep("otp");
-      }
+    const result = await handleSendOtp(emailValue);
+    if (result === "skipped") {
+      setStep("password");
+    } else if (result === "sent") {
+      setStep("otp");
     }
   };
 
