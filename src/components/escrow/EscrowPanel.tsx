@@ -46,6 +46,7 @@ export function EscrowPanel({
   suggestedAmount,
 }: EscrowPanelProps) {
   const [escrow, setEscrow] = useState<EscrowData | null>(null);
+  const [razorpayKeyId, setRazorpayKeyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [amount, setAmount] = useState(suggestedAmount?.toString() || "");
@@ -59,6 +60,7 @@ export function EscrowPanel({
       if (res.ok) {
         const data = await res.json();
         setEscrow(data.escrow);
+        if (data.razorpayKeyId) setRazorpayKeyId(data.razorpayKeyId);
       }
     } finally {
       setLoading(false);
@@ -132,6 +134,45 @@ export function EscrowPanel({
       razorpay.open();
     } catch {
       toast.error("Failed to create escrow");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleCompletePayment() {
+    if (!escrow || !razorpayKeyId) return;
+    setActionLoading(true);
+    try {
+      const options = {
+        key: razorpayKeyId,
+        amount: escrow.amountInr * 100,
+        currency: "INR",
+        name: "InfluenceIndia",
+        description: "Escrow Payment for Collaboration",
+        order_id: escrow.razorpayOrderId,
+        handler: async function (response: any) {
+          const verifyRes = await fetch(`/api/escrow/${escrow.id}/verify`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpaySignature: response.razorpay_signature,
+            }),
+          });
+          if (verifyRes.ok) {
+            toast.success("Payment secured in escrow!");
+            fetchEscrow();
+          } else {
+            toast.error("Payment verification failed");
+          }
+        },
+        theme: { color: "#7c3aed" },
+      };
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch {
+      toast.error("Failed to open payment");
     } finally {
       setActionLoading(false);
     }
@@ -324,6 +365,20 @@ export function EscrowPanel({
             INR {(escrow.amountInr - escrow.platformFeeInr).toLocaleString("en-IN")}
           </span>
         </div>
+
+        {/* Brand: complete pending payment */}
+        {escrow.status === "pending" && isBrand && razorpayKeyId && (
+          <div className="pt-2 border-t">
+            <Button
+              className="w-full bg-purple-700 hover:bg-purple-800"
+              onClick={handleCompletePayment}
+              disabled={actionLoading}
+            >
+              {actionLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
+              Complete Payment
+            </Button>
+          </div>
+        )}
 
         {/* Delivery proof section */}
         {escrow.deliverableProof && (

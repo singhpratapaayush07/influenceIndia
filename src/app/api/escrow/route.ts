@@ -147,5 +147,8 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json({ escrow });
+  return NextResponse.json({
+    escrow,
+    razorpayKeyId: escrow?.status === "pending" ? process.env.RAZORPAY_KEY_ID : undefined,
+  });
 }
