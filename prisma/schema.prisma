@@ -24,6 +24,8 @@ model User {
   receivedRequests   ContactRequest[]   @relation("InfluencerRequests")
   sentMessages       Message[]          @relation("SentMessages")
   receivedMessages   Message[]          @relation("ReceivedMessages")
+  brandPayments      EscrowPayment[]    @relation("BrandPayments")
+  influencerPayments EscrowPayment[]    @relation("InfluencerPayments")
 
   @@map("users")
 }
@@ -118,6 +120,7 @@ model ContactRequest {
   influencerProfile InfluencerProfile @relation("InfluencerProfileRequests", fields: [influencerProfileId], references: [id])
   brandProfile      BrandProfile      @relation("BrandProfileRequests", fields: [brandProfileId], references: [id])
   messages          Message[]
+  escrowPayments    EscrowPayment[]
 
   @@map("contact_requests")
 }
@@ -205,4 +208,32 @@ model OtpVerification {
   @@index([email, purpose])
   @@index([expiresAt])
   @@map("otp_verifications")
+}
+
+model EscrowPayment {
+  id                String    @id @default(cuid())
+  contactRequestId  String
+  brandUserId       String
+  influencerUserId  String
+  amountInr         Int       // Amount in whole INR
+  platformFeeInr    Int       @default(0)
+  status            String    @default("pending") // pending | held | released | refunded | disputed
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  paidAt            DateTime?
+  releasedAt        DateTime?
+  deliverableProof  String?
+  disputeReason     String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  contactRequest    ContactRequest @relation(fields: [contactRequestId], references: [id])
+  brandUser         User           @relation("BrandPayments", fields: [brandUserId], references: [id])
+  influencerUser    User           @relation("InfluencerPayments", fields: [influencerUserId], references: [id])
+
+  @@index([contactRequestId])
+  @@index([brandUserId])
+  @@index([influencerUserId])
+  @@index([status])
+  @@map("escrow_payments")
 }

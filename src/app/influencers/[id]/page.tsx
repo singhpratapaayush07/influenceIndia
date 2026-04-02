@@ -24,25 +24,38 @@ export default async function InfluencerProfilePage({ params }: { params: { id: 
   const niches: string[] = (profile.niches as unknown as string[]) || [];
   const languages: string[] = (profile.languages as unknown as string[]) || [];
 
-  // Check if current user has favorited this influencer
+  // Check if current user has favorited this influencer + active collaboration
   let isFavorited = false;
+  let hasActiveCollab = false;
   if (session?.user?.id && viewerType === "brand") {
     const brandProfile = await prisma.brandProfile.findUnique({
       where: { userId: session.user.id },
     });
 
     if (brandProfile) {
-      const favorite = await prisma.favorite.findUnique({
-        where: {
-          brandProfileId_influencerProfileId: {
-            brandProfileId: brandProfile.id,
-            influencerProfileId: profile.id,
+      const [favorite, activeRequest] = await Promise.all([
+        prisma.favorite.findUnique({
+          where: {
+            brandProfileId_influencerProfileId: {
+              brandProfileId: brandProfile.id,
+              influencerProfileId: profile.id,
+            },
           },
-        },
-      });
+        }),
+        prisma.contactRequest.findFirst({
+          where: {
+            brandUserId: session.user.id,
+            influencerUserId: profile.userId,
+            status: { in: ["completed", "in_progress"] },
+          },
+        }),
+      ]);
       isFavorited = !!favorite;
+      hasActiveCollab = !!activeRequest;
     }
   }
+  // Influencer viewing their own profile can always see their handles
+  const isOwnProfile = session?.user?.id === profile.userId;
 
   const scoreBreakdown = {
     followers: Math.min((profile.followerCount / 1_000_000) * 40, 40),
@@ -71,7 +84,7 @@ export default async function InfluencerProfilePage({ params }: { params: { id: 
             {profile.instagramHandle && (
               <p className="text-sm text-gray-500 flex items-center justify-center gap-1 mt-1">
                 <AtSign className="h-3.5 w-3.5 text-pink-500" />
-                @{profile.instagramHandle}
+                {hasActiveCollab || isOwnProfile ? `@${profile.instagramHandle}` : "Instagram Connected"}
               </p>
             )}
             {profile.city && (
@@ -122,8 +135,8 @@ export default async function InfluencerProfilePage({ params }: { params: { id: 
             ))}
           </div>
 
-          {/* Social Links */}
-          {(profile.youtubeHandle || profile.tiktokHandle) && (
+          {/* Social Links — only visible after active collaboration or to profile owner */}
+          {(profile.youtubeHandle || profile.tiktokHandle) && (hasActiveCollab || isOwnProfile) && (
             <div className="bg-white border rounded-2xl p-5 space-y-2">
               <h2 className="font-semibold text-sm text-gray-700">Also on</h2>
               {profile.youtubeHandle && (
@@ -134,6 +147,11 @@ export default async function InfluencerProfilePage({ params }: { params: { id: 
               {profile.tiktokHandle && (
                 <p className="text-sm text-gray-600">🎵 @{profile.tiktokHandle}</p>
               )}
+            </div>
+          )}
+          {(profile.youtubeHandle || profile.tiktokHandle) && !hasActiveCollab && !isOwnProfile && (
+            <div className="bg-gray-50 border border-dashed border-gray-200 rounded-2xl p-5 text-center">
+              <p className="text-sm text-gray-500">Social handles are shared after a collaboration is confirmed through the platform.</p>
             </div>
           )}
         </div>

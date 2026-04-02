@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { MessageThread } from "@/components/messages/MessageThread";
+import { EscrowPanel } from "@/components/escrow/EscrowPanel";
 import { notFound } from "next/navigation";
 
 async function getConversation(requestId: string, userId: string) {
@@ -15,13 +16,15 @@ async function getConversation(requestId: string, userId: string) {
       },
       influencerUser: {
         include: {
-          influencerProfile: { select: { displayName: true, profilePictureUrl: true } },
+          influencerProfile: {
+            include: { pricing: { take: 1, orderBy: { priceInr: "asc" } } },
+          },
         },
       },
       messages: {
         include: {
-          sender: { select: { email: true, userType: true } },
-          receiver: { select: { email: true, userType: true } },
+          sender: { select: { userType: true } },
+          receiver: { select: { userType: true } },
         },
         orderBy: { createdAt: "asc" },
       },
@@ -75,15 +78,44 @@ export default async function MessageThreadPage({
     ? otherProfile?.profilePictureUrl
     : otherProfile?.logoUrl;
 
+  // Get suggested amount from influencer pricing
+  const influencerProfile = (conversation.influencerUser as any).influencerProfile;
+  const suggestedAmount = influencerProfile?.pricing?.[0]?.priceInr;
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <MessageThread
-        requestId={params.requestId}
-        initialMessages={conversation.messages}
-        currentUserId={session.user.id}
-        otherUserName={displayName || "Unknown"}
-        otherUserAvatar={avatarUrl || undefined}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Message Thread — main column */}
+        <div className="lg:col-span-2">
+          <MessageThread
+            requestId={params.requestId}
+            initialMessages={conversation.messages}
+            currentUserId={session.user.id}
+            otherUserName={displayName || "Unknown"}
+            otherUserAvatar={avatarUrl || undefined}
+          />
+        </div>
+
+        {/* Escrow Panel — sidebar */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-24 space-y-4">
+            <EscrowPanel
+              contactRequestId={params.requestId}
+              contactRequestStatus={conversation.status}
+              isBrand={isUserBrand}
+              suggestedAmount={suggestedAmount}
+            />
+
+            {/* Collaboration status */}
+            <div className="bg-white border rounded-xl p-4 text-center">
+              <p className="text-xs text-gray-500 mb-1">Collaboration Status</p>
+              <p className="text-sm font-semibold capitalize text-gray-800">
+                {conversation.status}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

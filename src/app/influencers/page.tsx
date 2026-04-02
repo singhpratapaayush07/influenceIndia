@@ -38,7 +38,6 @@ async function getInfluencers(searchParams: SearchParams): Promise<InfluencerWit
       ...(searchParams.q && {
         OR: [
           { displayName: { contains: searchParams.q, mode: "insensitive" } },
-          { instagramHandle: { contains: searchParams.q, mode: "insensitive" } },
           { bio: { contains: searchParams.q, mode: "insensitive" } },
         ],
       }),

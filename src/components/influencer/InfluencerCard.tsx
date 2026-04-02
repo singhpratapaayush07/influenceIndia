@@ -70,7 +70,7 @@ export function InfluencerCard({ influencer, isFavorited = false }: InfluencerCa
               {influencer.instagramHandle && (
                 <p className="text-sm text-gray-500 flex items-center gap-1">
                   <AtSign className="h-3 w-3" />
-                  @{influencer.instagramHandle}
+                  Instagram Connected
                 </p>
               )}
               {influencer.city && (

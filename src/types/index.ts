@@ -199,11 +199,24 @@ export interface MessageWithUsers {
   isRead: boolean;
   createdAt: Date;
   sender: {
-    email: string;
     userType: string;
   };
   receiver: {
-    email: string;
     userType: string;
   };
+}
+
+export type EscrowStatus = "pending" | "held" | "released" | "refunded" | "disputed";
+
+export interface EscrowPaymentData {
+  id: string;
+  contactRequestId: string;
+  amountInr: number;
+  platformFeeInr: number;
+  status: EscrowStatus;
+  paidAt: string | null;
+  releasedAt: string | null;
+  deliverableProof: string | null;
+  disputeReason: string | null;
+  razorpayOrderId: string | null;
 }

@@ -33,8 +33,8 @@ export async function GET(
     const messages = await prisma.message.findMany({
       where: { requestId },
       include: {
-        sender: { select: { email: true, userType: true } },
-        receiver: { select: { email: true, userType: true } },
+        sender: { select: { userType: true } },
+        receiver: { select: { userType: true } },
       },
       orderBy: { createdAt: "asc" },
     });
