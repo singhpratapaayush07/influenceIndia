@@ -78,9 +78,13 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err: any) {
-    console.error("[escrow] Razorpay order creation failed:", err?.message ?? err);
+    const detail = err?.message
+      ?? err?.error?.description
+      ?? err?.statusCode
+      ?? (typeof err === 'object' ? JSON.stringify(err, Object.getOwnPropertyNames(err)) : String(err));
+    console.error("[escrow] Razorpay order creation failed:", detail, err);
     return NextResponse.json(
-      { error: "Payment gateway error. Please try again.", detail: err?.message },
+      { error: "Payment gateway error. Please try again.", detail },
       { status: 502 }
     );
   }
@@ -143,5 +147,8 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json({ escrow });
+  return NextResponse.json({
+    escrow,
+    razorpayKeyId: escrow?.status === "pending" ? process.env.RAZORPAY_KEY_ID : undefined,
+  });
 }
