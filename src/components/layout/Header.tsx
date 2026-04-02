@@ -41,9 +41,9 @@ export function Header() {
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-6 max-w-6xl">
 
-        {/* Logo */}
+        {/* Logo — go to dashboard when logged in, homepage when not */}
         <Link
-          href="/"
+          href={session ? dashboardHref : "/"}
           className={`font-serif italic text-2xl font-bold tracking-tight transition-colors ${
             isHome ? "text-white" : "text-purple-800"
           }`}
@@ -53,14 +53,16 @@ export function Header() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
-          <Link
-            href="/influencers"
-            className={`text-sm font-medium transition-colors ${
-              isHome ? "text-white/80 hover:text-white" : "text-gray-500 hover:text-purple-700"
-            }`}
-          >
-            Browse Influencers
-          </Link>
+          {userType !== "influencer" && (
+            <Link
+              href="/influencers"
+              className={`text-sm font-medium transition-colors ${
+                isHome ? "text-white/80 hover:text-white" : "text-gray-500 hover:text-purple-700"
+              }`}
+            >
+              Browse Influencers
+            </Link>
+          )}
           {session && userType === "influencer" && (
             <Link
               href="/campaigns"
