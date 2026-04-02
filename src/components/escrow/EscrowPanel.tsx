@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Shield, IndianRupee, AlertTriangle, CheckCircle2, Clock,
-  Loader2, Lock, Unlock, FileCheck, Ban, Gavel,
+  Loader2, Lock, Unlock, FileCheck, Ban, Gavel, Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PLATFORM_FEE_PERCENT } from "@/lib/escrow";
@@ -522,12 +522,55 @@ export function EscrowPanel({
           </div>
         )}
 
-        {/* Disputed state — info for brand/influencer */}
-        {escrow.status === "disputed" && !isAdmin && (
-          <div className="text-center py-2 border-t">
-            <Gavel className="h-5 w-5 text-amber-600 mx-auto mb-1" />
-            <p className="text-xs text-amber-700 font-medium">Under review by InfluenceIndia team</p>
-            <p className="text-xs text-gray-400 mt-1">Disputes are typically resolved within 48 hours</p>
+        {/* Disputed: influencer can resubmit work */}
+        {escrow.status === "disputed" && !isBrand && !isAdmin && (
+          <div className="space-y-2 pt-2 border-t">
+            <p className="text-xs text-amber-700 font-medium flex items-center gap-1">
+              <AlertTriangle className="h-3.5 w-3.5" /> The brand disputed your delivery
+            </p>
+            <Label className="text-xs">Resubmit Updated Work</Label>
+            <Textarea
+              placeholder="Describe what was updated or redone (e.g., 'Re-shot the reel with correct brand mentions, reposted on March 20')"
+              value={deliveryProof}
+              onChange={(e) => setDeliveryProof(e.target.value)}
+              rows={3}
+              className="text-sm"
+            />
+            <Button
+              size="sm"
+              className="w-full bg-purple-700 hover:bg-purple-800"
+              onClick={handleSubmitDelivery}
+              disabled={actionLoading}
+            >
+              {actionLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <FileCheck className="h-3 w-3 mr-1" />}
+              Resubmit & Request Review
+            </Button>
+          </div>
+        )}
+
+        {/* Disputed: brand can accept, re-dispute, or contact admin */}
+        {escrow.status === "disputed" && isBrand && !isAdmin && (
+          <div className="space-y-2 pt-2 border-t">
+            <p className="text-xs text-amber-700 font-medium flex items-center gap-1">
+              <Gavel className="h-3.5 w-3.5" /> Dispute raised — waiting for influencer to resubmit
+            </p>
+            <Button
+              size="sm"
+              className="w-full bg-green-600 hover:bg-green-700"
+              onClick={handleRelease}
+              disabled={actionLoading}
+            >
+              {actionLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Unlock className="h-3 w-3 mr-1" />}
+              Accept & Release Payment
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full border-amber-300 text-amber-700 hover:bg-amber-50"
+              onClick={() => window.open("mailto:support@influenceindia.in?subject=Dispute%20Help%20-%20Escrow%20" + escrow.id, "_blank")}
+            >
+              <Mail className="h-3 w-3 mr-1" /> Contact Admin
+            </Button>
           </div>
         )}
 

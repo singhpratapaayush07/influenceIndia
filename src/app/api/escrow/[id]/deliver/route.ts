@@ -31,25 +31,35 @@ export async function POST(
     return NextResponse.json({ error: "Only the influencer can submit delivery proof" }, { status: 403 });
   }
 
-  if (escrow.status !== "held") {
-    return NextResponse.json({ error: "Escrow must be in 'held' status to submit delivery" }, { status: 400 });
+  if (escrow.status !== "held" && escrow.status !== "disputed") {
+    return NextResponse.json({ error: "Escrow must be in 'held' or 'disputed' status to submit delivery" }, { status: 400 });
   }
+
+  const isResubmission = escrow.status === "disputed";
 
   // Filter contact info from proof text (but allow URLs since they might be content links)
   const filteredProof = maskContactInfo(deliverableProof.trim());
 
   await prisma.escrowPayment.update({
     where: { id: params.id },
-    data: { deliverableProof: filteredProof },
+    data: {
+      deliverableProof: filteredProof,
+      // Move back to held so brand can review again
+      ...(isResubmission ? { status: "held", disputeReason: null } : {}),
+    },
   });
 
   // Notify brand via system message
+  const message = isResubmission
+    ? `Updated deliverable proof resubmitted after dispute. Please review the new work and release payment or raise another dispute.`
+    : `Deliverable proof submitted. The brand has 7 days to review and release payment, or raise a dispute. After 7 days, funds are auto-released.`;
+
   await prisma.message.create({
     data: {
       requestId: escrow.contactRequestId,
       senderId: escrow.influencerUserId,
       receiverId: escrow.brandUserId,
-      content: `Deliverable proof submitted. The brand has 7 days to review and release payment, or raise a dispute. After 7 days, funds are auto-released.`,
+      content: message,
     },
   });
 

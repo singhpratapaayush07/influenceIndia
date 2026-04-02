@@ -27,8 +27,8 @@ export async function POST(
     return NextResponse.json({ error: "Not authorized to release funds" }, { status: 403 });
   }
 
-  if (escrow.status !== "held") {
-    return NextResponse.json({ error: "Escrow must be in 'held' status to release" }, { status: 400 });
+  if (escrow.status !== "held" && escrow.status !== "disputed") {
+    return NextResponse.json({ error: "Escrow must be in 'held' or 'disputed' status to release" }, { status: 400 });
   }
 
   const influencerPayout = calculateInfluencerPayout(escrow.amountInr);
