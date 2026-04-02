@@ -26,7 +26,7 @@ export function InfluencerCard({ influencer, isFavorited = false }: InfluencerCa
 
   return (
     <Link href={`/influencers/${influencer.userId}`}>
-      <Card className="hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer h-full relative">
+      <Card className="hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 cursor-pointer h-full relative nav-card-press">
         <FavoriteButton influencerProfileId={influencer.id} initialIsFavorited={isFavorited} />
         <CardContent className="p-5">
           {/* Badges row */}

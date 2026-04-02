@@ -244,7 +244,7 @@ export default async function InfluencerDashboardPage() {
                         <CardWrapper
                           key={req.id}
                           {...(wrapperProps as any)}
-                          className={`block px-6 py-5 hover:bg-gray-50 transition-colors ${isClickable ? "cursor-pointer" : ""}`}
+                          className={`block px-6 py-5 hover:bg-gray-50 transition-colors ${isClickable ? "cursor-pointer nav-card-press" : ""}`}
                         >
                           <div className="flex items-start gap-4">
                             <Avatar className="h-10 w-10 flex-shrink-0">
