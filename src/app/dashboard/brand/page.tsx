@@ -114,7 +114,7 @@ export default async function BrandDashboardPage() {
                   <Wrapper
                     key={req.id}
                     {...(wrapperProps as any)}
-                    className={`block py-4 flex items-center gap-4 ${isClickable ? "cursor-pointer hover:bg-gray-50 px-2 -mx-2 rounded-lg transition-colors" : ""}`}
+                    className={`block py-4 flex items-center gap-4 ${isClickable ? "cursor-pointer hover:bg-gray-50 px-2 -mx-2 rounded-lg transition-colors nav-card-press" : ""}`}
                   >
                     <Avatar className="h-10 w-10">
                       <AvatarFallback className="bg-purple-100 text-purple-700 font-semibold">

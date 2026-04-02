@@ -101,7 +101,7 @@ export default async function MessagesPage() {
 
             return (
               <Link key={conversation.id} href={`/dashboard/messages/${conversation.id}`}>
-                <Card className="hover:shadow-md transition-all cursor-pointer">
+                <Card className="hover:shadow-md transition-all cursor-pointer nav-card-press">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <Avatar className="h-12 w-12 flex-shrink-0">

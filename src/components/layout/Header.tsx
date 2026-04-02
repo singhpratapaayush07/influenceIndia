@@ -12,11 +12,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useNavigationProgress } from "@/components/layout/NavigationProgress";
 
 export function Header() {
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const { start: startNavProgress } = useNavigationProgress();
   const isHome = pathname === "/";
 
   const user = session?.user as any;
@@ -118,11 +120,11 @@ export function Header() {
                   <p className="text-xs font-semibold capitalize text-purple-700">{userType}</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push(dashboardHref)}>
+                <DropdownMenuItem onClick={() => { startNavProgress(); router.push(dashboardHref); }}>
                   Dashboard
                 </DropdownMenuItem>
                 {userType === "admin" && (
-                  <DropdownMenuItem onClick={() => router.push("/admin")}>
+                  <DropdownMenuItem onClick={() => { startNavProgress(); router.push("/admin"); }}>
                     Admin Panel
                   </DropdownMenuItem>
                 )}
