@@ -78,9 +78,10 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err: any) {
-    console.error("[escrow] Razorpay order creation failed:", err?.message ?? err);
+    const detail = err?.message ?? err?.error?.description ?? JSON.stringify(err);
+    console.error("[escrow] Razorpay order creation failed:", detail);
     return NextResponse.json(
-      { error: "Payment gateway error. Please try again.", detail: err?.message },
+      { error: "Payment gateway error. Please try again.", detail },
       { status: 502 }
     );
   }
