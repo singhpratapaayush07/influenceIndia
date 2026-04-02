@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { maskContactInfo } from "@/lib/content-filter";
 
 // POST /api/messages - Send a new message
 export async function POST(req: NextRequest) {
@@ -39,11 +40,11 @@ export async function POST(req: NextRequest) {
         requestId,
         senderId: userId,
         receiverId,
-        content: content.trim(),
+        content: maskContactInfo(content.trim()),
       },
       include: {
-        sender: { select: { email: true, userType: true } },
-        receiver: { select: { email: true, userType: true } },
+        sender: { select: { userType: true } },
+        receiver: { select: { userType: true } },
       },
     });
 

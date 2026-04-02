@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { TIER_TYPES } from "@/types";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/scoring";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
+import { detectContactInfo } from "@/lib/content-filter";
 
 interface Pricing {
   tierType: string;
@@ -26,6 +27,12 @@ export function ContactForm({ influencerUserId, influencerName, pricing }: Conta
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+
+  const contactWarning = useMemo(() => {
+    if (message.length < 5) return null;
+    const result = detectContactInfo(message);
+    return result.detected ? result.types : null;
+  }, [message]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -101,6 +108,12 @@ export function ContactForm({ influencerUserId, influencerName, pricing }: Conta
           required
         />
         <p className="text-xs text-gray-400">Include your campaign brief, timeline, and any specific requirements.</p>
+        {contactWarning && (
+          <div className="flex items-start gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+            <ShieldAlert className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+            <p>Contact information ({contactWarning.join(", ")}) will be automatically removed. All communication must happen through the platform.</p>
+          </div>
+        )}
       </div>
 
       <Button type="submit" className="w-full bg-purple-700 hover:bg-purple-800" disabled={loading}>

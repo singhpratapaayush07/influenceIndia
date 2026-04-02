@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
 
 function getSessionFromCookie(req: NextRequest) {
   // NextAuth v5 uses these cookie names
@@ -22,10 +23,52 @@ function getSessionFromCookie(req: NextRequest) {
   }
 }
 
+function getClientIp(req: NextRequest): string {
+  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+}
+
 export function middleware(req: NextRequest) {
   const { nextUrl } = req;
   const path = nextUrl.pathname;
 
+  // --- Rate limiting for public-facing routes ---
+  const ip = getClientIp(req);
+
+  if (path.startsWith("/influencers") && !path.startsWith("/influencers/")) {
+    // Browse page: 60 req/min
+    const { allowed } = rateLimit(`browse:${ip}`, 60, 60_000);
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+  }
+
+  if (/^\/influencers\/[^/]+$/.test(path)) {
+    // Profile detail: 30 req/min
+    const { allowed } = rateLimit(`profile:${ip}`, 30, 60_000);
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+  }
+
+  if (path === "/api/messages" && req.method === "POST") {
+    const session = getSessionFromCookie(req);
+    const key = session?.sub || ip;
+    const { allowed } = rateLimit(`msg:${key}`, 20, 60_000);
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many messages" }, { status: 429 });
+    }
+  }
+
+  if (path === "/api/contact" && req.method === "POST") {
+    const session = getSessionFromCookie(req);
+    const key = session?.sub || ip;
+    const { allowed } = rateLimit(`contact:${key}`, 5, 3_600_000); // 5 per hour
+    if (!allowed) {
+      return NextResponse.json({ error: "Too many contact requests" }, { status: 429 });
+    }
+  }
+
+  // --- Auth-based route protection ---
   const session = getSessionFromCookie(req);
   const isLoggedIn = !!session;
   const userType = session?.userType;
@@ -70,5 +113,9 @@ export const config = {
     "/onboarding/:path*",
     "/login",
     "/signup",
+    "/influencers/:path*",
+    "/influencers",
+    "/api/messages",
+    "/api/contact",
   ],
 };
