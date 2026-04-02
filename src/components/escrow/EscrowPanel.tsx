@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Shield, IndianRupee, AlertTriangle, CheckCircle2, Clock,
-  Loader2, Lock, Unlock, FileCheck, Ban,
+  Loader2, Lock, Unlock, FileCheck, Ban, Gavel,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PLATFORM_FEE_PERCENT } from "@/lib/escrow";
@@ -18,6 +18,7 @@ interface EscrowPanelProps {
   contactRequestId: string;
   contactRequestStatus: string;
   isBrand: boolean;
+  isAdmin?: boolean;
   suggestedAmount?: number;
 }
 
@@ -43,6 +44,7 @@ export function EscrowPanel({
   contactRequestId,
   contactRequestStatus,
   isBrand,
+  isAdmin = false,
   suggestedAmount,
 }: EscrowPanelProps) {
   const [escrow, setEscrow] = useState<EscrowData | null>(null);
@@ -240,6 +242,32 @@ export function EscrowPanel({
         fetchEscrow();
         setShowDisputeForm(false);
         setDisputeReason("");
+      } else {
+        const data = await res.json();
+        toast.error(data.error);
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleResolveDispute(resolution: "release" | "refund") {
+    if (!escrow) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/escrow/${escrow.id}/resolve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resolution }),
+      });
+
+      if (res.ok) {
+        toast.success(
+          resolution === "release"
+            ? "Funds released to influencer. Dispute resolved."
+            : "Funds will be refunded to brand. Dispute resolved."
+        );
+        fetchEscrow();
       } else {
         const data = await res.json();
         toast.error(data.error);
@@ -483,6 +511,50 @@ export function EscrowPanel({
                 Released on {new Date(escrow.releasedAt).toLocaleDateString("en-IN")}
               </p>
             )}
+          </div>
+        )}
+
+        {/* Refunded state */}
+        {escrow.status === "refunded" && (
+          <div className="text-center py-2">
+            <IndianRupee className="h-6 w-6 text-gray-500 mx-auto mb-1" />
+            <p className="text-xs text-gray-700 font-medium">Payment refunded to brand</p>
+          </div>
+        )}
+
+        {/* Disputed state — info for brand/influencer */}
+        {escrow.status === "disputed" && !isAdmin && (
+          <div className="text-center py-2 border-t">
+            <Gavel className="h-5 w-5 text-amber-600 mx-auto mb-1" />
+            <p className="text-xs text-amber-700 font-medium">Under review by InfluenceIndia team</p>
+            <p className="text-xs text-gray-400 mt-1">Disputes are typically resolved within 48 hours</p>
+          </div>
+        )}
+
+        {/* Admin: resolve dispute */}
+        {escrow.status === "disputed" && isAdmin && (
+          <div className="space-y-2 pt-2 border-t">
+            <p className="text-xs font-medium text-gray-700 flex items-center gap-1">
+              <Gavel className="h-3.5 w-3.5" /> Admin: Resolve Dispute
+            </p>
+            <Button
+              size="sm"
+              className="w-full bg-green-600 hover:bg-green-700"
+              onClick={() => handleResolveDispute("release")}
+              disabled={actionLoading}
+            >
+              {actionLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Unlock className="h-3 w-3 mr-1" />}
+              Release to Influencer
+            </Button>
+            <Button
+              size="sm"
+              className="w-full bg-amber-600 hover:bg-amber-700"
+              onClick={() => handleResolveDispute("refund")}
+              disabled={actionLoading}
+            >
+              {actionLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <IndianRupee className="h-3 w-3 mr-1" />}
+              Refund to Brand
+            </Button>
           </div>
         )}
       </CardContent>

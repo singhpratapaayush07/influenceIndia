@@ -10,7 +10,7 @@ import { RatingBadge } from "@/components/influencer/RatingBadge";
 import { formatFollowers } from "@/lib/scoring";
 import {
   CheckCircle2, Clock, XCircle, Mail, Users, TrendingUp,
-  ShieldCheck, Pencil, ExternalLink, Star, IndianRupee, Briefcase,
+  ShieldCheck, Pencil, ExternalLink, Star, IndianRupee, Briefcase, MessageSquare,
 } from "lucide-react";
 import { RequestStatusButtons } from "@/components/influencer/RequestStatusButtons";
 
@@ -233,54 +233,73 @@ export default async function InfluencerDashboardPage() {
                   </div>
                 ) : (
                   <div className="divide-y">
-                    {requests.map(req => (
-                      <div key={req.id} className="px-6 py-5 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-start gap-4">
-                          <Avatar className="h-10 w-10 flex-shrink-0">
-                            <AvatarFallback className="bg-blue-100 text-blue-700 font-bold">
-                              {req.brandProfile.companyName[0]?.toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-semibold text-gray-900">{req.brandProfile.companyName}</span>
-                              {req.brandProfile.industry && (
-                                <Badge variant="outline" className="text-xs">{req.brandProfile.industry}</Badge>
+                    {requests.map(req => {
+                      const isClickable = ["accepted", "in_progress", "completed"].includes(req.status);
+                      const CardWrapper = isClickable ? Link : "div";
+                      const wrapperProps = isClickable
+                        ? { href: `/dashboard/messages/${req.id}` }
+                        : {};
+
+                      return (
+                        <CardWrapper
+                          key={req.id}
+                          {...(wrapperProps as any)}
+                          className={`block px-6 py-5 hover:bg-gray-50 transition-colors ${isClickable ? "cursor-pointer" : ""}`}
+                        >
+                          <div className="flex items-start gap-4">
+                            <Avatar className="h-10 w-10 flex-shrink-0">
+                              <AvatarFallback className="bg-blue-100 text-blue-700 font-bold">
+                                {req.brandProfile.companyName[0]?.toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-semibold text-gray-900">{req.brandProfile.companyName}</span>
+                                {req.brandProfile.industry && (
+                                  <Badge variant="outline" className="text-xs">{req.brandProfile.industry}</Badge>
+                                )}
+                                {req.status === "pending" && (
+                                  <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-xs gap-1 ml-auto">
+                                    <Clock className="h-3 w-3" /> Pending
+                                  </Badge>
+                                )}
+                                {(req.status === "accepted" || req.status === "in_progress") && (
+                                  <Badge className="bg-green-50 text-green-700 border-green-200 text-xs gap-1 ml-auto">
+                                    <CheckCircle2 className="h-3 w-3" /> Accepted
+                                  </Badge>
+                                )}
+                                {req.status === "rejected" && (
+                                  <Badge className="bg-red-50 text-red-700 border-red-200 text-xs gap-1 ml-auto">
+                                    <XCircle className="h-3 w-3" /> Rejected
+                                  </Badge>
+                                )}
+                              </div>
+                              {req.tierType && (
+                                <p className="text-xs text-purple-600 mt-1 capitalize font-medium">
+                                  Requesting: {req.tierType}
+                                </p>
                               )}
+                              <p className="text-sm text-gray-600 mt-1.5 leading-relaxed">{req.message}</p>
+                              <div className="flex items-center justify-between mt-2">
+                                <p className="text-xs text-gray-400">
+                                  {new Date(req.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                                </p>
+                                {isClickable && (
+                                  <span className="text-xs text-purple-600 flex items-center gap-1">
+                                    <MessageSquare className="h-3 w-3" /> Open Messages
+                                  </span>
+                                )}
+                              </div>
                               {req.status === "pending" && (
-                                <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-xs gap-1 ml-auto">
-                                  <Clock className="h-3 w-3" /> Pending
-                                </Badge>
-                              )}
-                              {req.status === "accepted" && (
-                                <Badge className="bg-green-50 text-green-700 border-green-200 text-xs gap-1 ml-auto">
-                                  <CheckCircle2 className="h-3 w-3" /> Accepted
-                                </Badge>
-                              )}
-                              {req.status === "rejected" && (
-                                <Badge className="bg-red-50 text-red-700 border-red-200 text-xs gap-1 ml-auto">
-                                  <XCircle className="h-3 w-3" /> Rejected
-                                </Badge>
+                                <div className="mt-3">
+                                  <RequestStatusButtons requestId={req.id} />
+                                </div>
                               )}
                             </div>
-                            {req.tierType && (
-                              <p className="text-xs text-purple-600 mt-1 capitalize font-medium">
-                                Requesting: {req.tierType}
-                              </p>
-                            )}
-                            <p className="text-sm text-gray-600 mt-1.5 leading-relaxed">{req.message}</p>
-                            <p className="text-xs text-gray-400 mt-2">
-                              {new Date(req.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                            </p>
-                            {req.status === "pending" && (
-                              <div className="mt-3">
-                                <RequestStatusButtons requestId={req.id} />
-                              </div>
-                            )}
                           </div>
-                        </div>
-                      </div>
-                    ))}
+                        </CardWrapper>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>

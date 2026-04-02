@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, CheckCircle2, Clock, XCircle, TrendingUp, Heart, Briefcase } from "lucide-react";
+import { Search, CheckCircle2, Clock, XCircle, TrendingUp, Heart, Briefcase, MessageSquare } from "lucide-react";
 import { formatPrice } from "@/lib/scoring";
 
 export default async function BrandDashboardPage() {
@@ -105,33 +105,50 @@ export default async function BrandDashboardPage() {
             </div>
           ) : (
             <div className="divide-y">
-              {requests.map(req => (
-                <div key={req.id} className="py-4 flex items-center gap-4">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-purple-100 text-purple-700 font-semibold">
-                      {req.influencerProfile.displayName[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Link href={`/influencers/${req.influencerUserId}`} className="font-medium text-gray-900 hover:text-purple-700">
-                        {req.influencerProfile.displayName}
-                      </Link>
-                      {statusBadge(req.status)}
+              {requests.map(req => {
+                const isClickable = ["accepted", "in_progress", "completed"].includes(req.status);
+                const Wrapper = isClickable ? Link : "div";
+                const wrapperProps = isClickable ? { href: `/dashboard/messages/${req.id}` } : {};
+
+                return (
+                  <Wrapper
+                    key={req.id}
+                    {...(wrapperProps as any)}
+                    className={`block py-4 flex items-center gap-4 ${isClickable ? "cursor-pointer hover:bg-gray-50 px-2 -mx-2 rounded-lg transition-colors" : ""}`}
+                  >
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-purple-100 text-purple-700 font-semibold">
+                        {req.influencerProfile.displayName[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900">
+                          {req.influencerProfile.displayName}
+                        </span>
+                        {statusBadge(req.status)}
+                      </div>
+                      <p className="text-sm text-gray-500 truncate mt-0.5">{req.message}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs text-gray-400">
+                          {req.tierType && <span className="capitalize">{req.tierType} · </span>}
+                          {new Date(req.createdAt).toLocaleDateString("en-IN")}
+                        </p>
+                        {isClickable && (
+                          <span className="text-xs text-purple-600 flex items-center gap-1">
+                            <MessageSquare className="h-3 w-3" /> Messages
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-500 truncate mt-0.5">{req.message}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {req.tierType && <span className="capitalize">{req.tierType} · </span>}
-                      {new Date(req.createdAt).toLocaleDateString("en-IN")}
-                    </p>
-                  </div>
-                  {req.influencerProfile.pricing[0] && (
-                    <span className="text-sm font-medium text-purple-700">
-                      {formatPrice(req.influencerProfile.pricing[0].priceInr)}
-                    </span>
-                  )}
-                </div>
-              ))}
+                    {req.influencerProfile.pricing[0] && (
+                      <span className="text-sm font-medium text-purple-700">
+                        {formatPrice(req.influencerProfile.pricing[0].priceInr)}
+                      </span>
+                    )}
+                  </Wrapper>
+                );
+              })}
             </div>
           )}
         </CardContent>
