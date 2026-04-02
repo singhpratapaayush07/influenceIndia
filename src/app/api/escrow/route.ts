@@ -13,6 +13,7 @@ function getRazorpay() {
 
 // POST /api/escrow — Brand initiates escrow payment for a collaboration
 export async function POST(req: NextRequest) {
+  try {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -64,16 +65,25 @@ export async function POST(req: NextRequest) {
   const platformFee = calculatePlatformFee(amountInr);
 
   // Create Razorpay order
-  const order = await getRazorpay().orders.create({
-    amount: amountInr * 100, // Razorpay expects paise
-    currency: "INR",
-    receipt: `escrow_${contactRequestId}`,
-    notes: {
-      contactRequestId,
-      brandUserId: session.user.id,
-      influencerUserId: contactRequest.influencerUserId,
-    },
-  });
+  let order;
+  try {
+    order = await getRazorpay().orders.create({
+      amount: amountInr * 100, // Razorpay expects paise
+      currency: "INR",
+      receipt: `escrow_${contactRequestId}`,
+      notes: {
+        contactRequestId,
+        brandUserId: session.user.id,
+        influencerUserId: contactRequest.influencerUserId,
+      },
+    });
+  } catch (err: any) {
+    console.error("[escrow] Razorpay order creation failed:", err?.message ?? err);
+    return NextResponse.json(
+      { error: "Payment gateway error. Please try again.", detail: err?.message },
+      { status: 502 }
+    );
+  }
 
   // Create escrow record
   const escrow = await prisma.escrowPayment.create({
@@ -96,6 +106,10 @@ export async function POST(req: NextRequest) {
     platformFeeInr: platformFee,
     influencerPayout: amountInr - platformFee,
   });
+  } catch (err: any) {
+    console.error("[escrow POST] Unhandled error:", err?.message ?? err);
+    return NextResponse.json({ error: "Internal server error", detail: err?.message }, { status: 500 });
+  }
 }
 
 // GET /api/escrow?contactRequestId=xxx — Get escrow for a contact request
