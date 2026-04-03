@@ -40,10 +40,10 @@ export default async function InfluencerDashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
 
           {/* LEFT SIDEBAR */}
-          <div className="w-72 flex-shrink-0 space-y-4">
+          <div className="w-full lg:w-72 lg:flex-shrink-0 space-y-4">
 
             {/* Profile Card */}
             <Card className="overflow-hidden">
@@ -186,7 +186,7 @@ export default async function InfluencerDashboardPage() {
             )}
 
             {/* Stats Row */}
-            <div className="grid grid-cols-3 gap-4 mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
               <Card>
                 <CardContent className="pt-4 pb-4 px-5">
                   <p className="text-2xl font-bold text-gray-900">{requests.length}</p>
