@@ -110,7 +110,7 @@ export function MessageThread({
                     className={`flex ${isSentByMe ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                      className={`max-w-[85%] sm:max-w-[70%] rounded-lg px-3 sm:px-4 py-2 ${
                         isSentByMe
                           ? "bg-purple-600 text-white"
                           : "bg-gray-100 text-gray-900"

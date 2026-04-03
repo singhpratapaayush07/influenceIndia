@@ -62,7 +62,7 @@ export default async function BrandDashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {[
           { label: "Pending", value: statusCounts.pending, color: "text-yellow-700" },
           { label: "Accepted", value: statusCounts.accepted, color: "text-green-700" },

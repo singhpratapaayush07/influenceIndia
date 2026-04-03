@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { useState, useCallback } from "react";
 import { Search, X } from "lucide-react";
 
-export function InfluencerFilters() {
+export function InfluencerFilters({ onApply }: { onApply?: () => void } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -40,7 +40,8 @@ export function InfluencerFilters() {
     if (responseTime) params.set("responseTime", responseTime);
     if (sortBy) params.set("sortBy", sortBy);
     router.push(`/influencers?${params.toString()}`);
-  }, [search, selectedNiches, city, minScore, maxPrice, gender, ageRange, language, responseTime, sortBy, router]);
+    onApply?.();
+  }, [search, selectedNiches, city, minScore, maxPrice, gender, ageRange, language, responseTime, sortBy, router, onApply]);
 
   function clearFilters() {
     setSearch("");

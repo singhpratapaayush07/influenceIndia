@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { InfluencerCard } from "@/components/influencer/InfluencerCard";
 import { InfluencerFilters } from "@/components/influencer/InfluencerFilters";
+import { MobileFilterDrawer } from "@/components/influencer/MobileFilterDrawer";
 import { Suspense } from "react";
 import { auth } from "@/lib/auth";
 import type { InfluencerWithPricing } from "@/types";
@@ -116,9 +117,14 @@ export default async function InfluencersPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Browse Influencers</h1>
-        <p className="text-gray-500 mt-1">Discover verified Indian influencers for your next campaign</p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Browse Influencers</h1>
+          <p className="text-gray-500 mt-1">Discover verified Indian influencers for your next campaign</p>
+        </div>
+        <Suspense fallback={null}>
+          <MobileFilterDrawer />
+        </Suspense>
       </div>
 
       <div className="flex gap-8">

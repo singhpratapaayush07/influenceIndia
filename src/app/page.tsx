@@ -41,9 +41,9 @@ export default async function HomePage() {
       <section className="relative min-h-screen flex flex-col justify-center bg-[#0d0118] overflow-hidden -mt-16 pt-16">
         {/* Background texture / gradient orbs */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-purple-900/40 rounded-full blur-[160px]" />
-          <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-fuchsia-900/30 rounded-full blur-[120px]" />
-          <div className="absolute top-1/2 left-0 w-[300px] h-[300px] bg-indigo-900/20 rounded-full blur-[100px]" />
+          <div className="absolute top-0 left-1/4 w-[300px] md:w-[500px] lg:w-[700px] h-[300px] md:h-[500px] lg:h-[700px] bg-purple-900/40 rounded-full blur-[100px] md:blur-[160px]" />
+          <div className="absolute bottom-0 right-1/4 w-[250px] md:w-[400px] lg:w-[500px] h-[250px] md:h-[400px] lg:h-[500px] bg-fuchsia-900/30 rounded-full blur-[80px] md:blur-[120px]" />
+          <div className="absolute top-1/2 left-0 w-[150px] md:w-[250px] lg:w-[300px] h-[150px] md:h-[250px] lg:h-[300px] bg-indigo-900/20 rounded-full blur-[60px] md:blur-[100px]" />
         </div>
 
         {/* Subtle grid overlay */}
@@ -291,8 +291,8 @@ export default async function HomePage() {
       {/* ── FINAL CTA ────────────────────────────────────── */}
       <section className="py-28 px-6 bg-[#0d0118] relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute top-0 right-1/3 w-[500px] h-[500px] bg-purple-900/40 rounded-full blur-[140px]" />
-          <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-fuchsia-900/30 rounded-full blur-[120px]" />
+          <div className="absolute top-0 right-1/3 w-[250px] md:w-[400px] lg:w-[500px] h-[250px] md:h-[400px] lg:h-[500px] bg-purple-900/40 rounded-full blur-[100px] md:blur-[140px]" />
+          <div className="absolute bottom-0 left-1/4 w-[200px] md:w-[300px] lg:w-[400px] h-[200px] md:h-[300px] lg:h-[400px] bg-fuchsia-900/30 rounded-full blur-[80px] md:blur-[120px]" />
         </div>
         <div className="relative z-10 container mx-auto max-w-2xl text-center text-white">
           <h2 className="font-serif text-5xl md:text-7xl leading-tight mb-6">
